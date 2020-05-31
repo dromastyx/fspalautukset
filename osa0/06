@@ -1,0 +1,20 @@
+title 0.6: Uusi muistiinpano
+
+selain->palvelin: HTTP POST https://fullstack-exampleapp.herokuapp.com/new_note_spa
+palvelin->selain: statuskoodi 201 Created {"message":"note created"}
+
+note over selain:
+selain tekee POST tyyppisen pyynnön osoitteeseen new_note_spa
+sisältäen JSON muotoisen datan (muistiinpanon), missä on muistiinpanon
+sisältö ja aikaleima.
+
+Pyyntöön liitetty header Content-Type kertoo että pyyntöön liitetty
+data on muotoa JSON.
+end note over 
+
+note over palvelin:
+Palvelin ei pyydä uudelleenohjausta selaimelta vaan selain pysyy
+samalla sivulla
+end note over 
+
+
