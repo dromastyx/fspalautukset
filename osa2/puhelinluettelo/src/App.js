@@ -18,15 +18,12 @@ const Personform = ({addPerson, newName, newNum, handleNameChange, handleNumberC
     )
 }
 
-const Notification = ({ message }) => {
+const Notification = ({ message, color }) => {
   if (message === null) {
     return null
   }
-
-  const col = message.includes('removed') ? 'red' : 'green'
-
   const notificationStyle = {
-    color: col,
+    color: color,
     background: 'lightgrey',
     borderStyle: 'solid',
     borderRadius: '5',
@@ -46,6 +43,7 @@ const App = () => {
   const [ newNum, setNewNum ] = useState('')
   const [ filter, setFilter ] = useState('')
   const [notification, setNotification] = useState(null)
+  const [ notificationColor, setNotificationColor ] = useState('green')
 
   useEffect(() => {
     personService
@@ -63,21 +61,21 @@ const App = () => {
     }
     if (persons.map(p => p.name).includes(newPerson.name)) {
       window.alert(`${newPerson.name} is already added to phonebook, replace the old number with a new one?`)
-      const replacedPerson = persons.find(p => p.name == newPerson.name)
+      const replacedPerson = persons.find(p => p.name === newPerson.name)
       const id = replacedPerson.id
       personService
       .update(id, newPerson)
       .then(returnedPerson => {
         setPersons(persons.map(p => p.id !== id ? p : returnedPerson))
+        setNotificationColor('green')
         setNotification(`Modified ${returnedPerson.name}`)
         setTimeout(() => {
           setNotification(null)
         }, 5000)
       })
       .catch(error => {
-        setNotification(
-          `${replacedPerson.name} was already removed from server.`
-        )
+        setNotificationColor('red')
+        setNotification(`${replacedPerson.name} was already removed from server.`)
         setTimeout(() => {
           setNotification(null)
         }, 5000)
@@ -90,7 +88,15 @@ const App = () => {
         setPersons(persons.concat(returnedPerson))
         setNewName('')
         setNewNum('')
+        setNotificationColor('green')
         setNotification(`Added ${returnedPerson.name}`)
+        setTimeout(() => {
+          setNotification(null)
+        }, 5000)
+      })
+      .catch(error => {
+        setNotificationColor('red')
+        setNotification(`${error.response.data.error}`)
         setTimeout(() => {
           setNotification(null)
         }, 5000)
@@ -99,12 +105,13 @@ const App = () => {
   }
 
   const deletePerson = (id) => {
-    const deletedPerson = persons.find(p => p.id == id)
+    const deletedPerson = persons.find(p => p.id === id)
     if (window.confirm(`Want to delete ${deletedPerson.name}?`)) {
       personService
      .deleteObject(id)
      .then(() => {
-       setPersons(persons.filter(p => p.id != id))
+       setPersons(persons.filter(p => p.id !== id))
+       setNotificationColor('green')
        setNotification(`Deleted ${deletedPerson.name}`)
         setTimeout(() => {
           setNotification(null)
@@ -134,7 +141,7 @@ const App = () => {
   return (
     <div>
       <h2>Phonebook</h2>
-      <Notification message={notification} />
+      <Notification message={notification} color={notificationColor} />
         <div>
             Filter shown with <input onChange={handlePersonsToShow}/>
         </div>
@@ -145,7 +152,7 @@ const App = () => {
       <h2>Numbers</h2>
       <ul>
         {personsToShow.map(person => 
-          <Person key={person.name} person={person} handleClick=
+          <Person key={person.id} person={person} handleClick=
           {() => deletePerson(person.id)}/>
         )}
       </ul>
