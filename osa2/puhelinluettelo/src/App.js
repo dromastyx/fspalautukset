@@ -97,6 +97,7 @@ const App = () => {
       .catch(error => {
         setNotificationColor('red')
         setNotification(`${error.response.data.error}`)
+        console.log(error.response.data)
         setTimeout(() => {
           setNotification(null)
         }, 5000)
